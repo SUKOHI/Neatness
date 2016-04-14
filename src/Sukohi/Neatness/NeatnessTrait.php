@@ -6,10 +6,10 @@ use Illuminate\Support\Facades\View;
 trait NeatnessTrait {
 
 	private $_neatness_order_by = 'orderby',
-			$_neatness_direction = 'direction',
-			$_neatness_direction_values = [
-				'asc', 'desc'
-			];
+		$_neatness_direction = 'direction',
+		$_neatness_direction_values = [
+		'asc', 'desc'
+	];
 
 	public function scopeNeatness($query, $default_column = '', $default_direction = '') {
 
@@ -34,6 +34,7 @@ trait NeatnessTrait {
 		$results = new \stdClass();
 		$results->column = $column;
 		$results->direction = $direction;
+		$results->appends = $this->getAppends($column, $direction);
 		$results->urls = $this->getUrls($column, $direction);
 		$results->labels = $this->getLabels();
 		$results->symbols = $this->getSymbols($column, $direction);
@@ -56,7 +57,7 @@ trait NeatnessTrait {
 		return $column;
 
 	}
-	
+
 	private function getSortDirection() {
 
 		$direction = '';
@@ -69,7 +70,7 @@ trait NeatnessTrait {
 		}
 
 		return $direction;
-		
+
 	}
 
 	private function getDefaultColumn() {
@@ -98,20 +99,55 @@ trait NeatnessTrait {
 
 	}
 
+	private function getAppends($column, $direction) {
+
+		$original_params = [];
+
+		if(isset($this->neatness['appends'])) {
+
+			$original_params = Request::only($this->neatness['appends']);
+
+		} else {
+
+			$original_params = Request::except([
+				$this->_neatness_order_by,
+				$this->_neatness_direction
+			]);
+
+		}
+
+		return $original_params + [
+			$this->_neatness_order_by => $column,
+			$this->_neatness_direction => $direction
+		];
+
+	}
+
 	private function getUrls($current_column, $current_direction) {
 
-		$original_params = Request::except([
-			$this->_neatness_order_by,
-			$this->_neatness_direction
-		]);
+		$original_params = [];
+
+		if(isset($this->neatness['appends'])) {
+
+			$original_params = Request::only($this->neatness['appends']);
+
+		} else {
+
+			$original_params = Request::except([
+				$this->_neatness_order_by,
+				$this->_neatness_direction
+			]);
+
+		}
+
 		$urls = new \stdClass();
 
 		foreach ($this->getColumns() as $column) {
 
 			$params = $original_params + [
-				$this->_neatness_order_by => $column,
-				$this->_neatness_direction => ($column == $current_column) ? $this->getReverseDirection($current_direction) : $this->getDefaultDirection()
-			];
+					$this->_neatness_order_by => $column,
+					$this->_neatness_direction => ($column == $current_column) ? $this->getReverseDirection($current_direction) : $this->getDefaultDirection()
+				];
 			$urls->$column = Request::url() .'?'. http_build_query($params);
 
 		}

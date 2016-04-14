@@ -1,6 +1,8 @@
 # Neatness
-A Laravel package to automatically add sorting system for DB query and provide URLs to switch between ASC and DESC.
+A Laravel package to automatically add sorting system for DB query and provide URLs to switch between ASC and DESC.  
 (This is for Laravel 4.2. [For Laravel 5](https://github.com/SUKOHI/Neatness))
+
+[Demo](http://demo-laravel52.capilano-fw.com/neatness)
 
 # Installation
 
@@ -37,7 +39,8 @@ Secondary, add configuration values also in your Model.
             'asc' => '<i class="fa fa-sort-asc"></i>',
             'desc' => '<i class="fa fa-sort-desc"></i>',
             'default' => '<i class="fa fa-sort"></i>'
-        ]
+        ],
+        'appends' => ['name']
     ];
 
 # Usage
@@ -83,6 +86,10 @@ After call `neatness()`, you can access to sort data through `$neatness`.
     @foreach($neatness->urls as $column => $url)
         <a href="{{ $url }}">{{ $neatness->texts->$column }}</a>
     @endforeach
+
+**appends:** Array values for pagination
+  
+    {!! $items->appends($neatness->appends)->links() !!}  
 
 # Change default column and direction
 By this way, you can change default column and direction.
