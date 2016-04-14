@@ -25,6 +25,7 @@ Secondary, add configuration values also in your Model.
 **default:** Default column and direction. (Required)  
 **columns:** Columns and Labels you want to sort. (Required)  
 **symbols:** Symbols you will be able to use in your View. (Optional)  
+**appends:** Parameter names you want to append to url. (Optional)  
 
 
     protected $neatness = [
@@ -38,7 +39,8 @@ Secondary, add configuration values also in your Model.
             'asc' => '<i class="fa fa-sort-asc"></i>',
             'desc' => '<i class="fa fa-sort-desc"></i>',
             'default' => '<i class="fa fa-sort"></i>'
-        ]
+        ],
+        'appends' => ['name']
     ];
 
 # Usage
@@ -84,6 +86,14 @@ After call `neatness()`, you can access to sort data through `$neatness`.
     @foreach($neatness->urls as $column => $url)
         <a href="{{ $url }}">{!! $neatness->texts->$column !!}</a>
     @endforeach
+
+**appends:** Array values for pagination
+
+    // 5.2
+    {!! $items->appends($neatness->appends)->links() !!}  
+    
+    // 5.1
+    {!! $items->appends($neatness->appends)->render() !!}
 
 # Change default column and direction
 By this way, you can change default column and direction.

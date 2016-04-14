@@ -34,6 +34,7 @@ trait NeatnessTrait {
 		$results = new \stdClass();
 		$results->column = $column;
 		$results->direction = $direction;
+		$results->appends = $this->getAppends($column, $direction);
 		$results->urls = $this->getUrls($column, $direction);
 		$results->labels = $this->getLabels();
 		$results->symbols = $this->getSymbols($column, $direction);
@@ -98,12 +99,47 @@ trait NeatnessTrait {
 
 	}
 
+	private function getAppends($column, $direction) {
+
+		$original_params = [];
+
+		if(isset($this->neatness['appends'])) {
+
+			$original_params = Request::only($this->neatness['appends']);
+
+		} else {
+
+			$original_params = Request::except([
+				$this->_neatness_order_by,
+				$this->_neatness_direction
+			]);
+
+		}
+
+		return $original_params + [
+			$this->_neatness_order_by => $column,
+			$this->_neatness_direction => $direction
+		];
+
+	}
+
 	private function getUrls($current_column, $current_direction) {
 
-		$original_params = Request::except([
-			$this->_neatness_order_by,
-			$this->_neatness_direction
-		]);
+		$original_params = [];
+
+		if(isset($this->neatness['appends'])) {
+
+			$original_params = Request::only($this->neatness['appends']);
+
+		} else {
+
+			$original_params = Request::except([
+				$this->_neatness_order_by,
+				$this->_neatness_direction
+			]);
+
+		}
+
 		$urls = new \stdClass();
 
 		foreach ($this->getColumns() as $column) {
