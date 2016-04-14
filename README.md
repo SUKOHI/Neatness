@@ -8,20 +8,6 @@ Execute composer command.
 
     composer require sukohi/neatness:1.*
 
-Register the service provider in app.php
-
-    'providers' => [
-        ...Others...,  
-        'Sukohi\Neatness\NeatnessServiceProvider',
-    ]
-
-Also alias
-
-    'aliases' => [
-        ...Others...,  
-        'neatness' => 'Sukohi\Neatness\Facades\Neatness',
-    ]
-
 # Preparation
 
 At first, set `NeatnessTrait` in your Model.
