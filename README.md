@@ -22,10 +22,9 @@ At first, set `NeatnessTrait` in your Model.
 
 Secondary, add configuration values also in your Model.
 
-* default: Default column and direction. (Required)
-* columns: Columns and Labels you want to sort. (Required)
-* symbols: Symbols you will be able to use in your View. (Optional)  
-
+**default:** Default column and direction. (Required)  
+**columns:** Columns and Labels you want to sort. (Required)  
+**symbols:** Symbols you will be able to use in your View. (Optional)  
 
     protected $neatness = [
         'default' => ['id', 'desc'],
