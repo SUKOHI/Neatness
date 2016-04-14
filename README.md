@@ -49,7 +49,7 @@ Now you can use a method called `neatness`.
 
     $items = Item::neatness()->get();
 
-After call `neatness()`, you can access sort data through `$neatness`.
+After call `neatness()`, you can access to sort data through `$neatness`.
     
 (in View)
 
