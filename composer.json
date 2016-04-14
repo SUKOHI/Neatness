@@ -1,6 +1,6 @@
 {
     "name": "sukohi/neatness",
-    "description": "A Laravel package to automatically add sorting system for DB query and providing URLs to switch between ASC and DESC.",
+    "description": "A Laravel package to automatically add sorting system for DB query and provide URLs to switch between ASC and DESC.",
     "authors": [
         {
             "name": "Sukohi",

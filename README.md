@@ -1,5 +1,5 @@
 # Neatness
-A Laravel package to automatically add sorting system for DB query and providing URLs to switch between ASC and DESC.
+A Laravel package to automatically add sorting system for DB query and provide URLs to switch between ASC and DESC.
 (This is for Laravel 4.2. [For Laravel 5](https://github.com/SUKOHI/Neatness))
 
 # Installation
