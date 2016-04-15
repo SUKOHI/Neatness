@@ -43,6 +43,12 @@ Secondary, add configuration values also in your Model.
         'appends' => ['name']
     ];
 
+**Multiple columns:** If you want to sort by multiple columns, you can use delimiter `|` like so.
+
+    'columns' => [
+        'id|title' => 'LABEL'
+    ],
+
 # Usage
 
 Now you can use a method called `neatness`.
@@ -122,6 +128,31 @@ You can use this package with relationship using join().
 			'default' => '<i class="fa fa-sort"></i>'
 		]
 	];
+
+# Before filter (optional)
+
+You can set closure as the 3rd argument.  
+And it will be called before this package set ORDER BY clause.
+
+    $items = Item::neatness('id', 'asc', function($neatness){
+                                         
+                    // Get column & direction
+    
+                    $current_column = $neatness->getSortColumn();
+                    $current_direction = $neatness->getSortDirection();
+    
+                    // Set column & direction
+    
+                    $neatness->setSortColumn('title');
+                    $neatness->setSortDirection('desc');
+    
+    
+                    // Get DB query
+    
+                    $query = $neatness->getQuery();
+    
+                })
+                ->paginate(5);
 
 # License
 

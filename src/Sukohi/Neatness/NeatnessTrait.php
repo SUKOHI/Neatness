@@ -6,17 +6,26 @@ use Illuminate\Support\Facades\View;
 trait NeatnessTrait {
 
 	private $_neatness_order_by = 'orderby',
-		$_neatness_direction = 'direction',
-		$_neatness_direction_values = [
-		'asc', 'desc'
-	];
+			$_neatness_direction = 'direction',
+			$_neatness_direction_values = [
+				'asc', 'desc'
+			],
+			$_neatness_db_query = null;
 
-	public function scopeNeatness($query, $default_column = '', $default_direction = '') {
+	public function scopeNeatness($query, $default_column = '', $default_direction = '', $before_filter = null) {
+
+		$this->_neatness_db_query = $query;
 
 		if(!empty($default_column) && !empty($default_direction)) {
 
 			$this->neatness['default'][0] = $default_column;
 			$this->neatness['default'][1] = $default_direction;
+
+		}
+
+		if(is_callable($before_filter)) {
+
+			$before_filter($this);
 
 		}
 
@@ -30,7 +39,14 @@ trait NeatnessTrait {
 
 		}
 
-		$query->orderBy($column, $direction);
+		$sort_columns = explode('|', $column);
+echo '<pre>'. print_r($sort_columns, true) .'</pre>';
+		foreach ($sort_columns as $index => $sort_column) {
+
+			$this->_neatness_db_query->orderBy($sort_column, $direction);
+
+		}
+
 		$results = new \stdClass();
 		$results->column = $column;
 		$results->direction = $direction;
@@ -43,7 +59,7 @@ trait NeatnessTrait {
 
 	}
 
-	private function getSortColumn() {
+	public function getSortColumn() {
 
 		$column = '';
 		$request_column = strtolower(Request::get($this->_neatness_order_by));
@@ -58,7 +74,15 @@ trait NeatnessTrait {
 
 	}
 
-	private function getSortDirection() {
+	public function setSortColumn($column) {
+
+		Request::merge([
+			$this->_neatness_order_by => $column
+		]);
+
+	}
+
+	public function getSortDirection() {
 
 		$direction = '';
 		$request_direction = strtolower(Request::get($this->_neatness_direction));
@@ -70,6 +94,20 @@ trait NeatnessTrait {
 		}
 
 		return $direction;
+
+	}
+
+	public function setSortDirection($direction) {
+
+		Request::merge([
+			$this->_neatness_direction => $direction
+		]);
+
+	}
+
+	public function getQuery() {
+
+		return $this->_neatness_db_query;
 
 	}
 
