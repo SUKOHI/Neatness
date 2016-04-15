@@ -7,9 +7,7 @@ trait NeatnessTrait {
 
 	private $_neatness_order_by = 'orderby',
 			$_neatness_direction = 'direction',
-			$_neatness_direction_values = [
-				'asc', 'desc'
-			],
+			$_neatness_direction_values = ['asc', 'desc'],
 			$_neatness_db_query = null;
 
 	public function scopeNeatness($query, $default_column = '', $default_direction = '', $before_filter = null) {
@@ -39,11 +37,29 @@ trait NeatnessTrait {
 
 		}
 
-		$sort_columns = explode('|', $column);
+		if(strpos($column, 'scope::') === 0) {
 
-		foreach ($sort_columns as $index => $sort_column) {
+			$method = camel_case(str_replace('::', '_', $column));
 
-			$this->_neatness_db_query->orderBy($sort_column, $direction);
+			if(method_exists($this, $method)) {
+
+				$this->$method($query, $column, $direction);
+
+			} else {
+
+				throw new \Exception('Method '. $method .'() Not Found.');
+
+			}
+
+		} else {
+
+			$sort_columns = explode('|', $column);
+
+			foreach ($sort_columns as $index => $sort_column) {
+
+				$this->_neatness_db_query->orderBy($sort_column, $direction);
+
+			}
 
 		}
 
@@ -62,7 +78,7 @@ trait NeatnessTrait {
 	public function getSortColumn() {
 
 		$column = '';
-		$request_column = strtolower(Request::get($this->_neatness_order_by));
+		$request_column = Request::get($this->_neatness_order_by);
 
 		if(in_array($request_column, $this->getColumns())) {
 
@@ -85,7 +101,7 @@ trait NeatnessTrait {
 	public function getSortDirection() {
 
 		$direction = '';
-		$request_direction = strtolower(Request::get($this->_neatness_direction));
+		$request_direction = Request::get($this->_neatness_direction);
 
 		if(in_array($request_direction, $this->_neatness_direction_values)) {
 

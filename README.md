@@ -44,13 +44,26 @@ Secondary, add configuration values also in your Model.
         ],
         'appends' => ['name']
     ];
-    ];
 
 **Multiple columns:** If you want to sort by multiple columns, you can use delimiter `|` like so.
 
     'columns' => [
         'id|title' => 'LABEL'
     ],
+
+**Query Scope:** You also can utilize `Query Scopes` instead of column name.  
+
+    'columns' => [
+        'scope::sortTitle' => 'LABEL'
+    ],
+
+in this case, you need to prepare a scope method in your model. ([About Query Scopes](https://laravel.com/docs/5.2/eloquent#local-scopes))
+    
+    public function scopeSortTitle($query, $direction) {
+
+        return $query->orderBy('title', $direction);
+
+    }
     
 # Usage
 
