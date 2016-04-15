@@ -43,7 +43,7 @@ trait NeatnessTrait {
 
 			if(method_exists($this, $method)) {
 
-				$this->$method($query, $column, $direction);
+				$this->$method($query, $direction);
 
 			} else {
 
