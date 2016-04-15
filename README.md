@@ -49,6 +49,20 @@ Secondary, add configuration values also in your Model.
         'id|title' => 'LABEL'
     ],
 
+**Query Scope:** You also can utilize `Query Scopes` instead of column name.  
+
+    'columns' => [
+        'scope::sortTitle' => 'LABEL'
+    ],
+
+in this case, you need to prepare a scope method in your model. ([About Query Scopes](https://laravel.com/docs/4.2/eloquent#query-scopes))
+    
+    public function scopeSortTitle($query, $direction) {
+
+        return $query->orderBy('title', $direction);
+
+    }
+
 # Usage
 
 Now you can use a method called `neatness`.
