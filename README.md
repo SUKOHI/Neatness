@@ -95,7 +95,7 @@ After call `neatness()`, you can access to sort data through `$neatness`.
 
 **appends:** Array values for pagination
   
-    {!! $items->appends($neatness->appends)->links() !!}  
+    {{ $items->appends($neatness->appends)->links() }}
 
 # Change default column and direction
 By this way, you can change default column and direction.
