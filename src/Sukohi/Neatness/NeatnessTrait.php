@@ -40,7 +40,7 @@ trait NeatnessTrait {
 		}
 
 		$sort_columns = explode('|', $column);
-echo '<pre>'. print_r($sort_columns, true) .'</pre>';
+
 		foreach ($sort_columns as $index => $sort_column) {
 
 			$this->_neatness_db_query->orderBy($sort_column, $direction);
