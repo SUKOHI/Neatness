@@ -8,7 +8,7 @@ A Laravel package to automatically add sorting system for DB query and provide U
 
 Execute composer command.
 
-    composer require sukohi/neatness:1.*
+    composer require sukohi/neatness:3.*
 
 # Preparation
 
@@ -24,16 +24,23 @@ At first, set `NeatnessTrait` in your Model.
 
 Secondary, add configuration values also in your Model.
 
-**default:** Default column and direction. (Required)  
-**columns:** Columns and Labels you want to sort. (Required)  
+**default:** Default key and direction. (Required)  
+**columns:** Keys and column names you want to sort. (Required)  
+**symbols:** Labels you will be able to use in your View. (Optional)  
 **symbols:** Symbols you will be able to use in your View. (Optional)  
+**appends:** Keys you want to append to URLs. (Optional)  
 
     protected $neatness = [
-        'default' => ['id', 'desc'],
+        'default' => ['sort_id', 'desc'],
         'columns' => [
-            'id' => 'ID',
-            'title' => 'Title',
-            'created_at' => 'Date'
+            'sort_id' => 'id',
+            'sort_title' => 'title',
+            'sort_date' => 'created_at'
+        ],
+        'labels' => [
+            'sort_id' => 'ID',
+            'sort_title' => 'Title',
+            'sort_date' => 'Date'
         ],
         'symbols' => [
             'asc' => '<i class="fa fa-sort-asc"></i>',
@@ -46,13 +53,13 @@ Secondary, add configuration values also in your Model.
 **Multiple columns:** If you want to sort by multiple columns, you can use delimiter `|` like so.
 
     'columns' => [
-        'id|title' => 'LABEL'
+        'id_n_title' => 'id|title'
     ],
 
 **Query Scope:** You also can utilize `Query Scopes` instead of column name.  
 
     'columns' => [
-        'scope::sortTitle' => 'LABEL'
+        'scope_title' => 'scope::sortTitle'
     ],
 
 in this case, you need to prepare a scope method in your model. ([About Query Scopes](https://laravel.com/docs/4.2/eloquent#query-scopes))
@@ -75,6 +82,10 @@ After call `neatness()`, you can access to sort data through `$neatness`.
     
 (in View)
 
+**key:** The key name sorting now.
+
+    Column: {{ $neatness->key }}
+    
 **column:** The column name sorting now.
 
     Column: {{ $neatness->column }}
@@ -85,27 +96,43 @@ After call `neatness()`, you can access to sort data through `$neatness`.
     
 **urls:** URLs to switch sort. 
     
-    @foreach($neatness->urls as $column => $url)
-        {{ $column }} => {{ $url }}
+    @foreach($neatness->urls as $key => $url)
+        {{ $key }} => {{ $url }}
     @endforeach
+
+    or 
+    
+    $neatness->urls->get('title');
 
 **labels:** Labels you set in your Model.
 
-    @foreach($neatness->labels as $column => $label)
-        {{ $column }} => {{ $label }}
+    @foreach($neatness->labels as $key => $label)
+        {{ $key }} => {{ $label }}
     @endforeach
+    
+    or 
+    
+    $neatness->labels->get('title');
 
 **symbols:** Symbols plucked with sort state.
 
-    @foreach($neatness->symbols as $column => $symbol)
-        {{ $column }} => {{ $symbol }}
+    @foreach($neatness->symbols as $key => $symbol)
+        {{ $key }} => {{ $symbol }}
     @endforeach
+    
+    or 
+    
+    $neatness->symbols->get('title');
 
 **texts:** Texts mainly for link.
 
-    @foreach($neatness->urls as $column => $url)
-        <a href="{{ $url }}">{{ $neatness->texts->$column }}</a>
+    @foreach($neatness->urls as $key => $url)
+        <a href="{{ $url }}">{{ $neatness->texts->get($key) }}</a>
     @endforeach
+    
+    or 
+    
+    $neatness->texts->get('title');
 
 **appends:** Array values for pagination
   
@@ -131,42 +158,12 @@ You can use this package with relationship using join().
 	protected $neatness = [
 		'default' => ['items.id', 'desc'],
 		'columns' => [
-			'items.id' => 'ID',
-			'items.title' => 'Title',
-			'items.created_at' => 'Date',
-			'item_details.address' => 'Address'
-		],
-		'symbols' => [
-			'asc' => '<i class="fa fa-sort-asc"></i>',
-			'desc' => '<i class="fa fa-sort-desc"></i>',
-			'default' => '<i class="fa fa-sort"></i>'
+			'id' => 'items.id',
+			'title' => 'items.title',
+			'date' => 'items.created_at',
+			'address' => 'item_details.address'
 		]
 	];
-
-# Before filter (optional)
-
-You can set closure as the 3rd argument.  
-And it will be called before this package set ORDER BY clause.
-
-    $items = Item::neatness('id', 'asc', function($neatness){
-                                         
-                    // Get column & direction
-    
-                    $current_column = $neatness->getSortColumn();
-                    $current_direction = $neatness->getSortDirection();
-    
-                    // Set column & direction
-    
-                    $neatness->setSortColumn('title');
-                    $neatness->setSortDirection('desc');
-    
-    
-                    // Get DB query
-    
-                    $query = $neatness->getQuery();
-    
-                })
-                ->paginate(5);
 
 # License
 

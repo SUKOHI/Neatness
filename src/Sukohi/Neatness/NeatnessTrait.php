@@ -1,5 +1,6 @@
 <?php namespace Sukohi\Neatness;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\View;
 
@@ -10,32 +11,20 @@ trait NeatnessTrait {
 			$_neatness_direction_values = ['asc', 'desc'],
 			$_neatness_db_query = null;
 
-	public function scopeNeatness($query, $default_column = '', $default_direction = '', $before_filter = null) {
+	public function scopeNeatness($query, $default_key = '', $default_direction = '') {
 
 		$this->_neatness_db_query = $query;
 
-		if(!empty($default_column) && !empty($default_direction)) {
+		if(!empty($default_key) && !empty($default_direction)) {
 
-			$this->neatness['default'][0] = $default_column;
+			$this->neatness['default'][0] = $default_key;
 			$this->neatness['default'][1] = $default_direction;
 
 		}
 
-		if(is_callable($before_filter)) {
-
-			$before_filter($this);
-
-		}
-
-		$column = $this->getSortColumn();
-		$direction = $this->getSortDirection();
-
-		if(empty($column) || empty($direction)) {
-
-			$column = $this->getDefaultColumn();
-			$direction = $this->getDefaultDirection();
-
-		}
+		$key = $this->getNeatnessKey();
+		$column = $this->getNeatnessColumn($key);
+		$direction = $this->getNeatnessDirection();
 
 		if(strpos($column, 'scope::') === 0) {
 
@@ -64,43 +53,48 @@ trait NeatnessTrait {
 		}
 
 		$results = new \stdClass();
+		$results->key = $key;
 		$results->column = $column;
 		$results->direction = $direction;
-		$results->appends = $this->getAppends($column, $direction);
-		$results->urls = $this->getUrls($column, $direction);
-		$results->labels = $this->getLabels();
-		$results->symbols = $this->getSymbols($column, $direction);
-		$results->texts = $this->getText($results);
+		$results->appends = $this->getAppends($key, $direction);
+		$results->urls = $this->getNeatnessUrls($key, $direction);
+		$results->labels = Collection::make($this->neatness['labels']);
+		$results->symbols = $this->getNeatnessSymbols($key, $direction);
+		$results->texts = $this->getNeatnessTexts($results);
 		View::Share('neatness', $results);
 
 	}
 
-	public function getSortColumn() {
+	private function getNeatnessKey() {
 
-		$column = '';
-		$request_column = Request::get($this->_neatness_order_by);
+		$name = $this->_neatness_order_by;
 
-		if(in_array($request_column, $this->getColumns())) {
+		if(Request::has($name)) {
 
-			$column = $request_column;
+			return Request::get($name);
 
 		}
 
-		return $column;
+		return $this->neatness['default'][0];
 
 	}
 
-	public function setSortColumn($column) {
+	private function getNeatnessColumn($key) {
 
-		Request::merge([
-			$this->_neatness_order_by => $column
-		]);
+		if(isset($this->neatness['columns'][$key])) {
+
+			return $this->neatness['columns'][$key];
+
+		}
+
+		$key = $this->neatness['default'][0];
+		return $this->neatness['columns'][$key];
 
 	}
 
-	public function getSortDirection() {
+	private function getNeatnessDirection() {
 
-		$direction = '';
+		$direction = $this->neatness['default'][1];
 		$request_direction = Request::get($this->_neatness_direction);
 
 		if(in_array($request_direction, $this->_neatness_direction_values)) {
@@ -113,33 +107,7 @@ trait NeatnessTrait {
 
 	}
 
-	public function setSortDirection($direction) {
-
-		Request::merge([
-			$this->_neatness_direction => $direction
-		]);
-
-	}
-
-	public function getQuery() {
-
-		return $this->_neatness_db_query;
-
-	}
-
-	private function getDefaultColumn() {
-
-		return $this->neatness['default'][0];
-
-	}
-
-	private function getDefaultDirection() {
-
-		return $this->neatness['default'][1];
-
-	}
-
-	private function getReverseDirection($direction) {
+	private function getNeatnessReverseDirection($direction) {
 
 		$values = $this->_neatness_direction_values;
 
@@ -153,7 +121,7 @@ trait NeatnessTrait {
 
 	}
 
-	private function getAppends($column, $direction) {
+	private function getAppends($key, $direction) {
 
 		$original_params = [];
 
@@ -171,13 +139,13 @@ trait NeatnessTrait {
 		}
 
 		return $original_params + [
-			$this->_neatness_order_by => $column,
+			$this->_neatness_order_by => $key,
 			$this->_neatness_direction => $direction
 		];
 
 	}
 
-	private function getUrls($current_column, $current_direction) {
+	private function getNeatnessUrls($current_key, $current_direction) {
 
 		$original_params = [];
 
@@ -194,25 +162,26 @@ trait NeatnessTrait {
 
 		}
 
-		$urls = new \stdClass();
+		$urls = [];
 
-		foreach ($this->getColumns() as $column) {
+		foreach ($this->neatness['columns'] as $key => $column) {
 
+			$direction = ($key == $current_key) ? $this->getNeatnessReverseDirection($current_direction) : $this->neatness['default'][1];
 			$params = $original_params + [
-					$this->_neatness_order_by => $column,
-					$this->_neatness_direction => ($column == $current_column) ? $this->getReverseDirection($current_direction) : $this->getDefaultDirection()
-				];
-			$urls->$column = Request::url() .'?'. http_build_query($params);
+				$this->_neatness_order_by => $key,
+				$this->_neatness_direction => $direction
+			];
+			$urls[$key] = Request::url() .'?'. http_build_query($params);
 
 		}
 
-		return $urls;
+		return Collection::make($urls);
 
 	}
 
-	private function getSymbols($current_column, $current_direction) {
+	private function getNeatnessSymbols($current_key, $current_direction) {
 
-		$symbols = new \stdClass();
+		$symbols = [];
 
 		if(!isset($this->neatness['symbols'])) {
 
@@ -222,58 +191,38 @@ trait NeatnessTrait {
 
 		$original_symbols = $this->neatness['symbols'];
 
-		foreach ($this->getColumns() as $column) {
+		foreach ($this->neatness['columns'] as $key => $column) {
 
 			$symbol = $original_symbols['default'];
 
 			if(Request::has($this->_neatness_order_by) &&
 				Request::has($this->_neatness_direction) &&
-				$column == $current_column) {
+				$key == $current_key) {
 
 				$symbol = $original_symbols[$current_direction];
 
 			}
 
-			$symbols->$column = $symbol;
+			$symbols[$key] = $symbol;
 
 		}
 
-		return $symbols;
+		return Collection::make($symbols);
 
 	}
 
-	private function getColumns() {
+	private function getNeatnessTexts($results) {
 
-		return array_keys($this->neatness['columns']);
+		$texts = [];
 
-	}
+		foreach ($results->labels as $key => $label) {
 
-	private function getLabels() {
-
-		$labels = new \stdClass();
-
-		foreach ($this->neatness['columns'] as $column => $label) {
-
-			$labels->$column = $label;
+			$symbol = $results->symbols->get($key);
+			$texts[$key] = $label .' '. $symbol;
 
 		}
 
-		return $labels;
-
-	}
-
-	private function getText($results) {
-
-		$texts = new \stdClass();
-
-		foreach ($results->labels as $column => $label) {
-
-			$symbol = (isset($results->symbols->$column)) ? ' '. $results->symbols->$column : '';
-			$texts->$column = $label . $symbol;
-
-		}
-
-		return $texts;
+		return Collection::make($texts);
 
 	}
 
