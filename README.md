@@ -8,7 +8,7 @@ A Laravel package to automatically add sorting system for DB query and provide U
 
 Execute composer command.
 
-    composer require sukohi/neatness:1.*
+    composer require sukohi/neatness:3.*
 
 # Preparation
 
