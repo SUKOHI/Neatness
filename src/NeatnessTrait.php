@@ -58,7 +58,7 @@ trait NeatnessTrait {
 		$results->direction = $direction;
 		$results->appends = $this->getAppends($key, $direction);
 		$results->urls = $this->getNeatnessUrls($key, $direction);
-		$results->labels = Collection::make($this->neatness['labels']);
+		$results->labels = $this->getNeatnessLabels();
 		$results->symbols = $this->getNeatnessSymbols($key, $direction);
 		$results->texts = $this->getNeatnessTexts($results);
 		View::Share('neatness', $results);
@@ -223,6 +223,34 @@ trait NeatnessTrait {
 		}
 
 		return Collection::make($texts);
+
+	}
+
+	private function getNeatnessLabels() {
+
+		$labels = array_get($this->neatness, 'labels', []);
+
+		foreach ($labels as $key => $label) {
+
+			if(starts_with($label, 'label::')) {
+
+				$method = camel_case(str_replace('::', '_', $label));
+
+				if(method_exists($this, $method)) {
+
+					$labels[$key] = $this->$method();
+
+				} else {
+
+					throw new \Exception('Method '. $method .'() Not Found.');
+
+				}
+
+			}
+
+		}
+
+		return Collection::make($labels);
 
 	}
 

@@ -70,6 +70,20 @@ in this case, you need to prepare a scope method in your model. ([About Query Sc
 
     }
 
+**Label:** You can use `label::` prefix to call a specific method.
+
+    'labels' => [
+        'title' => 'label::SortTitle'
+    ],
+    
+in this case, you need to prepare a method in your model.  
+
+    public function labelSortTitle() {
+
+        return 'Your Title'.
+
+    }
+
 # Usage
 
 Now you can use a method called `neatness`.
