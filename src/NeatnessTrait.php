@@ -61,7 +61,8 @@ trait NeatnessTrait {
 		$results->labels = $this->getNeatnessLabels();
 		$results->symbols = $this->getNeatnessSymbols($key, $direction);
 		$results->texts = $this->getNeatnessTexts($results);
-		View::Share('neatness', $results);
+        $results->all_urls = $this->getNeatnessAllUrls($results->urls);
+		view()->share('neatness', $results);
 
 	}
 
@@ -175,9 +176,31 @@ trait NeatnessTrait {
 
 		}
 
-		return Collection::make($urls);
+		return collect($urls);
 
 	}
+
+	private function getNeatnessAllUrls($urls) {
+
+	    $all_urls = [];
+
+        if(!empty($urls)) {
+
+            foreach ($urls as $key => $url) {
+
+                foreach (['asc', 'desc'] as $direction) {
+
+                    $all_urls[$key][$direction] = preg_replace('!=(asc|desc)!', '='. $direction, $url);
+
+                }
+
+            }
+
+        }
+
+        return collect($all_urls);
+
+    }
 
 	private function getNeatnessSymbols($current_key, $current_direction) {
 
@@ -207,7 +230,7 @@ trait NeatnessTrait {
 
 		}
 
-		return Collection::make($symbols);
+		return collect($symbols);
 
 	}
 
@@ -222,7 +245,7 @@ trait NeatnessTrait {
 
 		}
 
-		return Collection::make($texts);
+		return collect($texts);
 
 	}
 
@@ -250,7 +273,7 @@ trait NeatnessTrait {
 
 		}
 
-		return Collection::make($labels);
+		return collect($labels);
 
 	}
 

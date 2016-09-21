@@ -98,7 +98,7 @@ After call `neatness()`, you can access to sort data through `$neatness`.
 
 **key:** The key name sorting now.
 
-    Column: {{ $neatness->key }}
+    Key: {{ $neatness->key }}
     
 **column:** The column name sorting now.
 
@@ -106,7 +106,7 @@ After call `neatness()`, you can access to sort data through `$neatness`.
     
 **direction:** The Direction sorting now. `asc` or `desc`
 
-    Column: {{ $neatness->direction }}
+    Direction: {{ $neatness->direction }}
     
 **urls:** URLs to switch sort. 
     
@@ -117,6 +117,19 @@ After call `neatness()`, you can access to sort data through `$neatness`.
     or 
     
     $neatness->urls->get('title');
+    
+**all_urls:** All URLs to switch sort. 
+    
+    @foreach($neatness->all_urls as $key => $urls)
+        @foreach($urls as $direction => $url)
+            {{ $direction }} => {{ $url }}<br>
+        @endforeach
+    @endforeach
+
+    or 
+    
+    $neatness->all_urls->get('title');          // Array
+    $neatness->all_urls->get('title')['desc']   // URL
 
 **labels:** Labels you set in your Model.
 
